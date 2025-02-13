@@ -83,7 +83,20 @@ def save_normal_val_imgs(
         targ_color = cv2.resize(targ_color, (rgb.shape[1], rgb.shape[0]))
         cat_img = np.concatenate([rgb_color, pred_color, targ_color], axis=0)
 
-    plt.imsave(os.path.join(save_dir, filename[:-4]+'_merge.jpg'), cat_img)
+    # Debugging: Print and visualize targ_color before saving
+    print(f"targ_color shape: {pred_color.shape}, dtype: {pred_color.dtype}")
+    #plt.imshow(pred_color)
+    #plt.show()
+
+    pred_color_converted = pred_color.copy()
+    # Flip the X component of the normal vectors
+    # pred_color_converted[..., 0] *= -1
+
+    # LvdS: also save the Normal image individually
+    plt.imsave(os.path.join(save_dir, filename[:-4]+'.jpg'), pred_color_converted)
+
+    # save the image with three results together (third one is missing if there is no GT to compare against)
+    # plt.imsave(os.path.join(save_dir, filename[:-4]+'_merge.jpg'), cat_img)
     # cv2.imwrite(os.path.join(save_dir, filename[:-4]+'.jpg'), pred_color)
     # save to tensorboard
     if tb_logger is not None:
@@ -128,10 +141,18 @@ def vis_surface_normal(normal: torch.tensor, mask: torch.tensor=None) -> np.arra
         mask (torch.tensor, [h, w]): valid masks
     """
     normal = normal.cpu().numpy().squeeze()
+
+    # Flip the X component of the normal vectors
+    normal[..., 0] *= -1
+
     n_img_L2 = np.sqrt(np.sum(normal ** 2, axis=2, keepdims=True))
     n_img_norm = normal / (n_img_L2 + 1e-8)
     normal_vis = n_img_norm * 127
     normal_vis += 128
+
+    # Invert the colors
+    normal_vis = 255 - normal_vis
+
     normal_vis = normal_vis.astype(np.uint8)
     if mask is not None:
         mask = mask.cpu().numpy().squeeze()

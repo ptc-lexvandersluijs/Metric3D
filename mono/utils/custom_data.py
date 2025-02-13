@@ -27,8 +27,27 @@ def load_from_annos(anno_path):
         datas.append(data_i)
     return datas
 
-def load_data(path: str):
+#def load_data(path: str):
+#    rgbs = glob.glob(path + '/*.jpg') + glob.glob(path + '/*.png')
+#    #intrinsic =  [835.8179931640625, 835.8179931640625, 961.5419921875, 566.8090209960938] #[721.53769, 721.53769, 609.5593, 172.854]
+#    data = [{'rgb': i, 'depth': None, 'intrinsic': None, 'filename': os.path.basename(i), 'folder': i.split('/')[-3]} for i in rgbs]
+#    return data
+
+def load_data(path: str, exclude_substring: str = None):
     rgbs = glob.glob(path + '/*.jpg') + glob.glob(path + '/*.png')
-    #intrinsic =  [835.8179931640625, 835.8179931640625, 961.5419921875, 566.8090209960938] #[721.53769, 721.53769, 609.5593, 172.854]
-    data = [{'rgb': i, 'depth': None, 'intrinsic': None, 'filename': os.path.basename(i), 'folder': i.split('/')[-3]} for i in rgbs]
+    data = []
+    
+    for i in rgbs:
+        filename = os.path.basename(i)
+        if (exclude_substring is None or 
+            exclude_substring == 'None' or 
+            exclude_substring not in filename):
+            data.append({
+                'rgb': i,
+                'depth': None,
+                'intrinsic': None,
+                'filename': filename,
+                'folder': i.split('/')[-3]
+            })
+    
     return data

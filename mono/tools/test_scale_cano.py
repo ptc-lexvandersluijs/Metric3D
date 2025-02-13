@@ -38,6 +38,7 @@ def parse_args():
     parser.add_argument('--launcher', choices=['None', 'pytorch', 'slurm', 'mpi', 'ror'], default='slurm', help='job launcher')
     parser.add_argument('--test_data_path', default='None', type=str, help='the path of test data')
     parser.add_argument('--batch_size', default=1, type=int, help='the batch size for inference')
+    parser.add_argument('--exclude_substring', default='None', type=str, help='which files from the test_data_path to exclude')
     args = parser.parse_args()
     return args
 
@@ -98,7 +99,7 @@ def main(args):
     if 'json' in test_data_path:
         test_data = load_from_annos(test_data_path)
     else:
-        test_data = load_data(args.test_data_path)
+        test_data = load_data(args.test_data_path, args.exclude_substring)
     
     if not cfg.distributed:
         main_worker(0, cfg, args.launcher, test_data)
